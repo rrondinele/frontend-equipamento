@@ -62,26 +62,36 @@ const fetchData = async () => {
   }
 };
 
-  const handleExport = async () => {
-    try {
-      setLoading(true);
-      const params = {};
-      
-      if (startDate) params.dataInicial = startDate.toISOString().split('T')[0];
-      if (endDate) params.dataFinal = endDate.toISOString().split('T')[0];
-      
-      const response = await axios.get('http://localhost:5000/api/equipamentos/export', {
-        params,
-        responseType: 'blob'
-      });
-      
-      saveAs(new Blob([response.data]), 'equipamentos.xlsx');
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
+const handleExport = async () => {
+  try {
+    setLoading(true);
+    const params = {};
+    
+    // Use EXATAMENTE a mesma lógica de fetchData
+    if (equipamentoFilter) {
+      const equipamentos = equipamentoFilter
+        .split(/[\n,\s]+/)
+        .filter(e => e.trim() !== '');
+      params.equipamento = equipamentos.join(',');
     }
-  };
+    
+    if (startDate && endDate) {
+      params.dataInicial = format(startDate, 'yyyy-MM-dd');
+      params.dataFinal = format(endDate, 'yyyy-MM-dd');
+    }
+
+    const response = await axios.get('http://localhost:5000/api/equipamentos/export', {
+      params,
+      responseType: 'blob'
+    });
+    
+    saveAs(new Blob([response.data]), 'equipamentos_filtrados.xlsx');
+    setLoading(false);
+  } catch (err) {
+    setError(err.message);
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchData();
@@ -200,11 +210,11 @@ const fetchData = async () => {
                 <TableCell>Instalação</TableCell>
                 <TableCell>Nota</TableCell>
                 <TableCell>Cliente</TableCell>
-                <TableCell>Texto breve</TableCell>
+                <TableCell>Descrição Nota</TableCell>
                 <TableCell>Alavanca</TableCell>
                 <TableCell>Data Conclusão</TableCell>
-                <TableCell>Equip. Removido</TableCell>
-                <TableCell>Equip. Instalado</TableCell>
+                <TableCell>Equipamento Removido</TableCell>
+                <TableCell>Equipamento Instalado</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
