@@ -36,33 +36,62 @@ function App() {
   const [endDate, setEndDate] = useState(null);
   const [equipamentoFilter, setEquipamentoFilter] = useState('');
 
-const fetchData = async () => {
-  try {
-    setLoading(true);
-    const params = {};
-    
-    // Processa a lista de equipamentos (um por linha ou separados por espaço/vírgula)
-    if (equipamentoFilter) {
-      const equipamentos = equipamentoFilter
-        .split(/[\n,\s]+/) // Divide por quebra de linha, vírgula ou espaço
-        .filter(e => e.trim() !== ''); // Remove valores vazios
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null); // Limpa erros anteriores
       
-      params.equipamento = equipamentos.join(',');
+      const params = {};
+      
+      // Processa a lista de equipamentos
+      if (equipamentoFilter) {
+        const equipamentos = equipamentoFilter
+          .split(/[\n,\s]+/)
+          .filter(e => e.trim() !== '');
+        
+        params.equipamento = equipamentos.join(',');
+      }
+      
+      // Formata datas
+      if (startDate && endDate) {
+        params.dataInicial = format(startDate, 'yyyy-MM-dd');
+        params.dataFinal = format(endDate, 'yyyy-MM-dd');
+      }
+  
+      // Chamada API com configuração completa
+      const response = await axios.get(`${API_URL}/api/equipamentos`, {
+        params,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        timeout: 10000 // 10 segundos timeout
+      });
+  
+      // Verifica se a resposta contém dados
+      if (!response.data) {
+        throw new Error('Resposta da API sem dados');
+      }
+  
+      setData(response.data);
+      
+    } catch (err) {
+      // Tratamento de erros mais detalhado
+      const errorMessage = err.response 
+        ? `Erro ${err.response.status}: ${err.response.data?.message || err.message}`
+        : `Erro de conexão: ${err.message}`;
+      
+      setError(errorMessage);
+      console.error('Erro na requisição:', {
+        url: `${API_URL}/api/equipamentos`,
+        error: err,
+        params
+      });
+      
+    } finally {
+      setLoading(false);
     }
-    
-    if (startDate && endDate) {
-      params.dataInicial = format(startDate, 'yyyy-MM-dd');
-      params.dataFinal = format(endDate, 'yyyy-MM-dd');
-    }
-
-    const response = await axios.get('http://localhost:5000/api/equipamentos', { params });
-    setData(response.data);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 const handleExport = async () => {
   try {
