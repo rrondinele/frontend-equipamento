@@ -24,7 +24,9 @@ import { saveAs } from 'file-saver';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale'; // Opcional - para formato em português
 
-
+const API_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:5000' 
+  : 'https://backend-equipamento.onrender.com';
 
 function App() {
   const [data, setData] = useState([]);
