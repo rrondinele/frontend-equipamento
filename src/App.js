@@ -254,7 +254,20 @@ function App() {
                   <TableCell>{row['Cliente']}</TableCell>
                   <TableCell>{row['Texto breve para o code']}</TableCell>
                   <TableCell>{row['Alavanca']}</TableCell>
-                  <TableCell>{formatDate(row['Data Conclusão'])}</TableCell>
+                  {/*<TableCell>{formatDate(row['Data Conclusão'])}</TableCell>*/}
+
+                  <TableCell>
+                    {row['Data Conclusão'] ? (() => {
+                      const dateStr = row['Data Conclusão'];
+                      const [year, month, day] = dateStr.split('T')[0].split('-');
+                      return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+                    })() : '-'}
+                  </TableCell>
+
+
+
+
+
                   <TableCell>{row['Equipamento Removido']}</TableCell>
                   <TableCell>{row['Equipamento Instalado']}</TableCell>
                 </TableRow>
