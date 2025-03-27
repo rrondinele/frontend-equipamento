@@ -1,3 +1,4 @@
+// App.js - Correções
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -22,11 +23,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { saveAs } from 'file-saver';
 import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale'; // Opcional - para formato em português
+import { ptBR } from 'date-fns/locale';
 
-const API_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:5000' 
-  : 'https://backend-equipamento.onrender.com';
+// Configuração única da URL da API
+const API_URL = 'https://backend-equipamento.onrender.com';
 
 function App() {
   const [data, setData] = useState([]);
@@ -37,15 +37,16 @@ function App() {
   const [equipamentoFilter, setEquipamentoFilter] = useState('');
 
   const fetchData = async () => {
+    const params = {};
+    
     try {
       setLoading(true);
-      const params = {};
+      setError(null);
       
-      // Processa a lista de equipamentos (um por linha ou separados por espaço/vírgula)
       if (equipamentoFilter) {
         const equipamentos = equipamentoFilter
-          .split(/[\n,\s]+/) // Divide por quebra de linha, vírgula ou espaço
-          .filter(e => e.trim() !== ''); // Remove valores vazios
+          .split(/[\n,\s]+/)
+          .filter(e => e.trim() !== '');
         
         params.equipamento = equipamentos.join(',');
       }
@@ -55,49 +56,88 @@ function App() {
         params.dataFinal = format(endDate, 'yyyy-MM-dd');
       }
 
-      const response = await axios.get('http://localhost:5000/api/equipamentos', { params });
+      const response = await axios.get(`${API_URL}/api/equipamentos`, {
+        params,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        timeout: 10000
+      });
+
+      if (!response.data) {
+        throw new Error('Resposta da API sem dados');
+      }
+
       setData(response.data);
+      
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response 
+        ? `Erro ${err.response.status}: ${err.response.data?.message || err.message}`
+        : `Erro de conexão: ${err.message}`;
+      
+      setError(errorMessage);
+      console.error('Erro na requisição:', {
+        url: `${API_URL}/api/equipamentos`,
+        error: err,
+        params
+      });
+      
     } finally {
       setLoading(false);
     }
   };
 
-const handleExport = async () => {
-  try {
-    setLoading(true);
-    const params = {};
-    
-    // Use EXATAMENTE a mesma lógica de fetchData
-    if (equipamentoFilter) {
-      const equipamentos = equipamentoFilter
-        .split(/[\n,\s]+/)
-        .filter(e => e.trim() !== '');
-      params.equipamento = equipamentos.join(',');
-    }
-    
-    if (startDate && endDate) {
-      params.dataInicial = format(startDate, 'yyyy-MM-dd');
-      params.dataFinal = format(endDate, 'yyyy-MM-dd');
-    }
+  const handleExport = async () => {
+    try {
+      setLoading(true);
+      const params = {};
+      
+      if (equipamentoFilter) {
+        const equipamentos = equipamentoFilter
+          .split(/[\n,\s]+/)
+          .filter(e => e.trim() !== '');
+        params.equipamento = equipamentos.join(',');
+      }
+      
+      if (startDate && endDate) {
+        params.dataInicial = format(startDate, 'yyyy-MM-dd');
+        params.dataFinal = format(endDate, 'yyyy-MM-dd');
+      }
 
-    const response = await axios.get('http://localhost:5000/api/equipamentos/export', {
-      params,
-      responseType: 'blob'
-    });
-    
-    saveAs(new Blob([response.data]), 'equipamentos_filtrados.xlsx');
-    setLoading(false);
-  } catch (err) {
-    setError(err.message);
-    setLoading(false);
-  }
-};
+      const response = await axios.get(`${API_URL}/api/equipamentos/export`, {
+        params,
+        responseType: 'blob'
+      });
+      
+      saveAs(new Blob([response.data]), 'equipamentos_filtrados.xlsx');
+      
+    } catch (err) {
+      const errorMessage = err.response 
+        ? `Erro ${err.response.status}: ${err.response.data?.message || err.message}`
+        : `Erro de exportação: ${err.message}`;
+      
+      setError(errorMessage);
+      console.error('Erro na exportação:', err);
+      
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? '-' : format(date, 'dd/MM/yyyy');
+    } catch {
+      return '-';
+    }
+  };
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -116,8 +156,7 @@ const handleExport = async () => {
           <DatePicker
             label="Data Inicial"
             value={startDate}
-            onChange={(newValue) => setStartDate(newValue)}
-            //inputFormat="dd/MM/yyyy" // Formato de exibição brasileiro
+            onChange={setStartDate}
             renderInput={(params) => (
               <TextField 
                 {...params} 
@@ -129,8 +168,7 @@ const handleExport = async () => {
           <DatePicker
             label="Data Final"
             value={endDate}
-            onChange={(newValue) => setEndDate(newValue)}
-            //inputFormat="dd/MM/yyyy" // Formato de exibição brasileiro
+            onChange={setEndDate}
             renderInput={(params) => (
               <TextField 
                 {...params} 
@@ -139,17 +177,6 @@ const handleExport = async () => {
               />
             )}
           />
-
-          {/*
-          <TextField
-            label="Equip. Removido"
-            value={equipamentoFilter}
-            onChange={(e) => setEquipamentoFilter(e.target.value)}
-            size="small"
-            sx={{ width: 200 }}
-            placeholder="Ex: ABC123, XYZ456"
-          />
-          */}
 
           <TextField
             label="Equip. Removido"
@@ -162,31 +189,31 @@ const handleExport = async () => {
             placeholder="Cole a lista aqui"
           />
           
-          {/* Esta Box nova é a única alteração necessária */}
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             <Button 
               variant="contained" 
               onClick={fetchData}
               size="small"
               sx={{ height: 40 }}
+              disabled={loading}
             >
-              Filtrar
+              {loading ? <CircularProgress size={24} /> : 'Filtrar'}
             </Button>
             <Button 
               variant="outlined" 
               onClick={handleExport}
               size="small"
               sx={{ height: 40 }}
+              disabled={loading}
             >
-              Exportar
+              {loading ? <CircularProgress size={24} /> : 'Exportar'}
             </Button>
           </Box>
         </Box>
       </LocalizationProvider>
   
-      {/* Todo o resto permanece EXATAMENTE igual */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
@@ -227,13 +254,7 @@ const handleExport = async () => {
                   <TableCell>{row['Cliente']}</TableCell>
                   <TableCell>{row['Texto breve para o code']}</TableCell>
                   <TableCell>{row['Alavanca']}</TableCell>
-                  <TableCell>
-                  {row['Data Conclusão'] ? (() => {
-                    const dateStr = row['Data Conclusão'];
-                    const [year, month, day] = dateStr.split('T')[0].split('-');
-                    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
-                  })() : '-'}
-                  </TableCell>
+                  <TableCell>{formatDate(row['Data Conclusão'])}</TableCell>
                   <TableCell>{row['Equipamento Removido']}</TableCell>
                   <TableCell>{row['Equipamento Instalado']}</TableCell>
                 </TableRow>
