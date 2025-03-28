@@ -62,7 +62,7 @@ function App() {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        timeout: 10000
+        timeout: 25000
       });
 
       if (!response.data) {
@@ -232,7 +232,7 @@ function App() {
                   color: 'white',
                   fontWeight: '500',
                   fontSize: '0.875rem',
-                  padding: '4px 16px',
+                  padding: '4px 8px',
                   borderBottom: 'none'
                 }
               }}>
@@ -255,7 +255,6 @@ function App() {
                   <TableCell>{row['Texto breve para o code']}</TableCell>
                   <TableCell>{row['Alavanca']}</TableCell>
                   {/*<TableCell>{formatDate(row['Data Conclusão'])}</TableCell>*/}
-
                   <TableCell>
                     {row['Data Conclusão'] ? (() => {
                       const dateStr = row['Data Conclusão'];
@@ -263,11 +262,6 @@ function App() {
                       return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
                     })() : '-'}
                   </TableCell>
-
-
-
-
-
                   <TableCell>{row['Equipamento Removido']}</TableCell>
                   <TableCell>{row['Equipamento Instalado']}</TableCell>
                 </TableRow>
