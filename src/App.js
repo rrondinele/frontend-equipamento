@@ -232,7 +232,7 @@ function App() {
                   color: 'white',
                   fontWeight: '500',
                   fontSize: '0.875rem',
-                  padding: '4px 8px',
+                  padding: '4px 6px',
                   borderBottom: 'none'
                 }
               }}>
