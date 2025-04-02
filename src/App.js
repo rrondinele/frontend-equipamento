@@ -1,4 +1,3 @@
-// App.js - Correções
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -16,16 +15,13 @@ import {
   Box,
   CircularProgress,
   Alert,
-  Grid
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { format } from 'date-fns';
 import { saveAs } from 'file-saver';
-import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
-// Configuração única da URL da API
 const API_URL = 'https://backend-equipamento.onrender.com';
 
 function App() {
@@ -37,52 +33,62 @@ function App() {
   const [equipamentoFilter, setEquipamentoFilter] = useState('');
 
   const fetchData = async () => {
-    const params = {};
-    
     try {
       setLoading(true);
       setError(null);
       
+      // Definir params no escopo da função
+      const params = {};
+      
       if (equipamentoFilter) {
-        const equipamentos = equipamentoFilter
+        params.equipamento = equipamentoFilter
           .split(/[\n,\s]+/)
-          .filter(e => e.trim() !== '');
-        
-        params.equipamento = equipamentos.join(',');
+          .filter(e => e.trim() !== '')
+          .join(',');
       }
       
       if (startDate && endDate) {
         params.dataInicial = format(startDate, 'yyyy-MM-dd');
         params.dataFinal = format(endDate, 'yyyy-MM-dd');
       }
-
+  
       const response = await axios.get(`${API_URL}/api/equipamentos`, {
         params,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        timeout: 25000
+        timeout: 30000
       });
-
+  
       if (!response.data) {
         throw new Error('Resposta da API sem dados');
       }
-
+  
       setData(response.data);
       
     } catch (err) {
-      const errorMessage = err.response 
-        ? `Erro ${err.response.status}: ${err.response.data?.message || err.message}`
-        : `Erro de conexão: ${err.message}`;
+      let errorMessage = 'Erro ao carregar dados';
+      
+      if (err.response) {
+        // Erro com resposta do servidor
+        errorMessage = `Erro ${err.response.status}: ${err.response.data?.error || err.message}`;
+        console.error('Detalhes do erro:', {
+          status: err.response.status,
+          data: err.response.data,
+          url: err.config.url,
+          params: err.config.params // Acessa os params da requisição
+        });
+      } else if (err.request) {
+        // Requisição foi feita mas não houve resposta
+        errorMessage = 'Servidor não respondeu - verifique sua conexão';
+        console.error('Erro de conexão:', {
+          request: err.request,
+          url: err.config.url
+        });
+      } else {
+        // Erro ao configurar a requisição
+        errorMessage = `Erro na requisição: ${err.message}`;
+        console.error('Erro de configuração:', err);
+      }
       
       setError(errorMessage);
-      console.error('Erro na requisição:', {
-        url: `${API_URL}/api/equipamentos`,
-        error: err,
-        params
-      });
-      
     } finally {
       setLoading(false);
     }
@@ -91,20 +97,21 @@ function App() {
   const handleExport = async () => {
     try {
       setLoading(true);
+      // Definir params no escopo da função
       const params = {};
       
       if (equipamentoFilter) {
-        const equipamentos = equipamentoFilter
+        params.equipamento = equipamentoFilter
           .split(/[\n,\s]+/)
-          .filter(e => e.trim() !== '');
-        params.equipamento = equipamentos.join(',');
+          .filter(e => e.trim() !== '')
+          .join(',');
       }
       
       if (startDate && endDate) {
         params.dataInicial = format(startDate, 'yyyy-MM-dd');
         params.dataFinal = format(endDate, 'yyyy-MM-dd');
       }
-
+  
       const response = await axios.get(`${API_URL}/api/equipamentos/export`, {
         params,
         responseType: 'blob'
@@ -113,13 +120,25 @@ function App() {
       saveAs(new Blob([response.data]), 'equipamentos_filtrados.xlsx');
       
     } catch (err) {
-      const errorMessage = err.response 
-        ? `Erro ${err.response.status}: ${err.response.data?.message || err.message}`
-        : `Erro de exportação: ${err.message}`;
+      let errorMessage = 'Erro ao exportar dados';
+      
+      if (err.response) {
+        errorMessage = `Erro ${err.response.status}: ${err.response.data?.error || err.message}`;
+        console.error('Detalhes do erro na exportação:', {
+          status: err.response.status,
+          data: err.response.data,
+          url: err.config.url,
+          params: err.config.params
+        });
+      } else if (err.request) {
+        errorMessage = 'Servidor não respondeu durante a exportação';
+        console.error('Erro de conexão na exportação:', err.request);
+      } else {
+        errorMessage = `Erro na configuração da exportação: ${err.message}`;
+        console.error('Erro de configuração na exportação:', err);
+      }
       
       setError(errorMessage);
-      console.error('Erro na exportação:', err);
-      
     } finally {
       setLoading(false);
     }
@@ -145,7 +164,7 @@ function App() {
         Consulta de Equipamentos
       </Typography>
       
-      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Box sx={{ 
           display: 'flex', 
           gap: 1,
@@ -251,23 +270,16 @@ function App() {
             <TableBody>
               {data.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell>{row['Instalação']}</TableCell>
-                  <TableCell>{row['Nota']}</TableCell>
-                  <TableCell>{row['Cliente']}</TableCell>
-                  <TableCell>{row['Texto breve para o code']}</TableCell>
-                  <TableCell>{row['Alavanca']}</TableCell>
-                  {/*<TableCell>{formatDate(row['Data Conclusão'])}</TableCell>*/}
-                  <TableCell>
-                    {row['Data Conclusão'] ? (() => {
-                      const dateStr = row['Data Conclusão'];
-                      const [year, month, day] = dateStr.split('T')[0].split('-');
-                      return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
-                    })() : '-'}
-                  </TableCell>
-                  <TableCell>{row['Equipamento Removido']}</TableCell>
-                  <TableCell>{row['Status Equip. Removido']}</TableCell>
-                  <TableCell>{row['Equipamento Instalado']}</TableCell>
-                  <TableCell>{row['Status Equip. Instalado']}</TableCell>
+                  <TableCell>{row['Instalação'] || '-'}</TableCell>
+                  <TableCell>{row['Nota'] || '-'}</TableCell>
+                  <TableCell>{row['Cliente'] || '-'}</TableCell>
+                  <TableCell>{row['Texto breve para o code'] || '-'}</TableCell>
+                  <TableCell>{row['Alavanca'] || '-'}</TableCell>
+                  <TableCell>{formatDate(row['Data Conclusão'])}</TableCell>
+                  <TableCell>{row['Equipamento Removido'] || '-'}</TableCell>
+                  <TableCell>{row['Status Equip. Removido'] || '-'}</TableCell>
+                  <TableCell>{row['Equipamento Instalado'] || '-'}</TableCell>
+                  <TableCell>{row['Status Equip. Instalado'] || '-'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
