@@ -100,6 +100,9 @@ function App() {
       }
 
       setData(response.data);
+
+      console.log("Campos recebidos:", Object.keys(response.data[0]));
+
       
     } catch (err) {
       let errorMessage = 'Erro ao carregar dados';
@@ -271,9 +274,13 @@ function App() {
                 <TableCell sx={styles.tableHeaderCell}>Alavanca</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Data Conclusão</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Equip. Removido</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Material Removido</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Descrição Mat. Removido</TableCell>
                 <TableCell sx={{...styles.tableHeaderCell, whiteSpace: 'normal', lineHeight: '1.2', py: 1, textAlign: 'left', width: '100px', minWidth: '100px', maxWidth: '100px'}}>Status Equip.<br />Removido</TableCell>
                 {/*<TableCell sx={styles.tableHeaderCell}>Status Equip. Removido</TableCell>*/}
                 <TableCell sx={styles.tableHeaderCell}>Equip. Instalado</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Material Instalado</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Descrição Mat. Instalado</TableCell>
                 <TableCell sx={{...styles.tableHeaderCell, whiteSpace: 'normal', lineHeight: '1.2', py: 1, textAlign: 'left', width: '100px', minWidth: '100px', maxWidth: '100px'}}>Status Equip.<br />Instalado</TableCell>
                 {/*<TableCell sx={styles.tableHeaderCell}>Status Equip. Instalado</TableCell>*/}
                {/*<TableCell sx={{ ...styles.tableHeaderCell, ...styles.mediumColumn }}>Status Equip. Instalado</TableCell>*/}
@@ -289,8 +296,12 @@ function App() {
                   <TableCell sx={styles.tableCell}>{row['Alavanca'] || '-'}</TableCell>
                   <TableCell sx={styles.tableCell}>{formatDate(row['Data Conclusão'])}</TableCell>
                   <TableCell sx={styles.tableCell}>{row['Equipamento Removido'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Material Removido'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Descrição Mat. Removido'] || '-'}</TableCell>
                   <TableCell sx={styles.tableCell}>{row['Status Equip. Removido'] || '-'}</TableCell>
                   <TableCell sx={styles.tableCell}>{row['Equipamento Instalado'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Material Instalado'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Descrição Mat. Instalado'] || '-'}</TableCell>
                   <TableCell sx={styles.tableCell}>{row['Status Equip. Instalado'] || '-'}</TableCell>
                 </TableRow>
               ))}
