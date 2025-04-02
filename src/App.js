@@ -243,7 +243,9 @@ function App() {
                 <TableCell>Alavanca</TableCell>
                 <TableCell>Data Conclusão</TableCell>
                 <TableCell>Equipamento Removido</TableCell>
+                <TableCell>Status Equip. Removido</TableCell>
                 <TableCell>Equipamento Instalado</TableCell>
+                <TableCell>Status Equip. Instalado</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -263,7 +265,9 @@ function App() {
                     })() : '-'}
                   </TableCell>
                   <TableCell>{row['Equipamento Removido']}</TableCell>
+                  <TableCell>{row['Status Equip. Removido']}</TableCell>
                   <TableCell>{row['Equipamento Instalado']}</TableCell>
+                  <TableCell>{row['Status Equip. Instalado']}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
