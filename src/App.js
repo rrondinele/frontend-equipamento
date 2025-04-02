@@ -24,6 +24,45 @@ import { saveAs } from 'file-saver';
 
 const API_URL = 'https://backend-equipamento.onrender.com';
 
+// Estilos customizados
+const styles = {
+  tableContainer: {
+    width: '100%',
+    overflowX: 'auto',
+    marginTop: '16px',
+    boxShadow: 3
+  },
+  table: {
+    minWidth: '1200px', // Largura mínima maior para acomodar todas as colunas
+  },
+  tableHeaderCell: {
+    backgroundColor: '#1976d2',
+    color: 'white',
+    fontWeight: '500',
+    fontSize: '0.875rem',
+    padding: '12px 16px',
+    borderBottom: 'none',
+    whiteSpace: 'nowrap'
+  },
+  tableCell: {
+    padding: '10px 16px',
+    whiteSpace: 'nowrap',
+    fontSize: '0.8rem' // Reduzido para ~11px (0.75rem = 12px)
+  },
+  wideColumn: {
+    minWidth: '250px'
+  },
+  mediumColumn: {
+    minWidth: '150px'
+  },
+  filterContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: '16px',
+    borderRadius: '8px',
+    marginBottom: '24px'
+  }
+};
+
 function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,7 +76,6 @@ function App() {
       setLoading(true);
       setError(null);
       
-      // Definir params no escopo da função
       const params = {};
       
       if (equipamentoFilter) {
@@ -51,41 +89,28 @@ function App() {
         params.dataInicial = format(startDate, 'yyyy-MM-dd');
         params.dataFinal = format(endDate, 'yyyy-MM-dd');
       }
-  
+
       const response = await axios.get(`${API_URL}/api/equipamentos`, {
         params,
         timeout: 30000
       });
-  
+
       if (!response.data) {
         throw new Error('Resposta da API sem dados');
       }
-  
+
       setData(response.data);
       
     } catch (err) {
       let errorMessage = 'Erro ao carregar dados';
       
       if (err.response) {
-        // Erro com resposta do servidor
         errorMessage = `Erro ${err.response.status}: ${err.response.data?.error || err.message}`;
-        console.error('Detalhes do erro:', {
-          status: err.response.status,
-          data: err.response.data,
-          url: err.config.url,
-          params: err.config.params // Acessa os params da requisição
-        });
+        console.error('Detalhes do erro:', err.response.data);
       } else if (err.request) {
-        // Requisição foi feita mas não houve resposta
         errorMessage = 'Servidor não respondeu - verifique sua conexão';
-        console.error('Erro de conexão:', {
-          request: err.request,
-          url: err.config.url
-        });
       } else {
-        // Erro ao configurar a requisição
         errorMessage = `Erro na requisição: ${err.message}`;
-        console.error('Erro de configuração:', err);
       }
       
       setError(errorMessage);
@@ -97,7 +122,6 @@ function App() {
   const handleExport = async () => {
     try {
       setLoading(true);
-      // Definir params no escopo da função
       const params = {};
       
       if (equipamentoFilter) {
@@ -111,7 +135,7 @@ function App() {
         params.dataInicial = format(startDate, 'yyyy-MM-dd');
         params.dataFinal = format(endDate, 'yyyy-MM-dd');
       }
-  
+
       const response = await axios.get(`${API_URL}/api/equipamentos/export`, {
         params,
         responseType: 'blob'
@@ -124,18 +148,10 @@ function App() {
       
       if (err.response) {
         errorMessage = `Erro ${err.response.status}: ${err.response.data?.error || err.message}`;
-        console.error('Detalhes do erro na exportação:', {
-          status: err.response.status,
-          data: err.response.data,
-          url: err.config.url,
-          params: err.config.params
-        });
       } else if (err.request) {
-        errorMessage = 'Servidor não respondeu durante a exportação';
-        console.error('Erro de conexão na exportação:', err.request);
+        errorMessage = 'Servidor não respondeu - verifique sua conexão';
       } else {
-        errorMessage = `Erro na configuração da exportação: ${err.message}`;
-        console.error('Erro de configuração na exportação:', err);
+        errorMessage = `Erro na requisição: ${err.message}`;
       }
       
       setError(errorMessage);
@@ -159,77 +175,79 @@ function App() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}> {/* Alterado para maxWidth="xl" */}
       <Typography variant="h4" component="h1" gutterBottom>
         Consulta de Equipamentos
       </Typography>
       
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 1,
-          mb: 2,
-          alignItems: 'center',
-          flexWrap: 'wrap'
-        }}>
-          <DatePicker
-            label="Data Inicial"
-            value={startDate}
-            onChange={setStartDate}
-            renderInput={(params) => (
-              <TextField 
-                {...params} 
-                size="small" 
-                sx={{ width: 150 }}
-              />
-            )}
-          />
-          <DatePicker
-            label="Data Final"
-            value={endDate}
-            onChange={setEndDate}
-            renderInput={(params) => (
-              <TextField 
-                {...params} 
-                size="small" 
-                sx={{ width: 150 }}
-              />
-            )}
-          />
+      <Box sx={styles.filterContainer}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2,
+            mb: 2,
+            alignItems: 'center',
+            flexWrap: 'wrap'
+          }}>
+            <DatePicker
+              label="Data Inicial"
+              value={startDate}
+              onChange={setStartDate}
+              renderInput={(params) => (
+                <TextField 
+                  {...params} 
+                  size="small" 
+                  sx={{ width: 180 }} // Aumentei a largura
+                />
+              )}
+            />
+            <DatePicker
+              label="Data Final"
+              value={endDate}
+              onChange={setEndDate}
+              renderInput={(params) => (
+                <TextField 
+                  {...params} 
+                  size="small" 
+                  sx={{ width: 180 }} // Aumentei a largura
+                />
+              )}
+            />
 
-          <TextField
-            label="Equip. Removido"
-            value={equipamentoFilter}
-            onChange={(e) => setEquipamentoFilter(e.target.value)}
-            size="small"
-            sx={{ width: 200 }}
-            multiline
-            rows={1.5}
-            placeholder="Cole a lista aqui"
-          />
-          
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <Button 
-              variant="contained" 
-              onClick={fetchData}
+            <TextField
+              label="Equip. Removido"
+              value={equipamentoFilter}
+              onChange={(e) => setEquipamentoFilter(e.target.value)}
               size="small"
-              sx={{ height: 40 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Filtrar'}
-            </Button>
-            <Button 
-              variant="outlined" 
-              onClick={handleExport}
-              size="small"
-              sx={{ height: 40 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Exportar'}
-            </Button>
+              sx={{ width: 250 }} // Aumentei a largura
+              multiline
+              rows={1.5}
+              placeholder="Cole a lista aqui (separar por vírgula ou quebra de linha)"
+            />
+            
+            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              <Button 
+                variant="contained" 
+                onClick={fetchData}
+                size="medium" // Alterado para medium
+                sx={{ height: 40, minWidth: 120 }}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : 'Filtrar'}
+              </Button>
+              <Button 
+                variant="outlined" 
+                onClick={handleExport}
+                size="medium" // Alterado para medium
+                sx={{ height: 40, minWidth: 120 }}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : 'Exportar'}
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </LocalizationProvider>
+        </LocalizationProvider>
+      </Box>
   
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
@@ -242,44 +260,38 @@ function App() {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="tabela de equipamentos">
+        <TableContainer component={Paper} sx={styles.tableContainer}>
+          <Table sx={styles.table} aria-label="tabela de equipamentos">
             <TableHead>
-              <TableRow sx={{
-                backgroundColor: '#1976d2',
-                '& th': {
-                  color: 'white',
-                  fontWeight: '500',
-                  fontSize: '0.875rem',
-                  padding: '4px 6px',
-                  borderBottom: 'none'
-                }
-              }}>
-                <TableCell>Instalação</TableCell>
-                <TableCell>Nota</TableCell>
-                <TableCell>Cliente</TableCell>
-                <TableCell>Descrição Nota</TableCell>
-                <TableCell>Alavanca</TableCell>
-                <TableCell>Data Conclusão</TableCell>
-                <TableCell>Equipamento Removido</TableCell>
-                <TableCell>Status Equip. Removido</TableCell>
-                <TableCell>Equipamento Instalado</TableCell>
-                <TableCell>Status Equip. Instalado</TableCell>
+              <TableRow>
+                <TableCell sx={styles.tableHeaderCell}>Instalação</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Nota</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Cliente</TableCell>
+                <TableCell sx={{ ...styles.tableHeaderCell, ...styles.wideColumn }}>Descrição Nota</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Alavanca</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Data Conclusão</TableCell>
+                <TableCell sx={styles.tableHeaderCell}>Equip. Removido</TableCell>
+                <TableCell sx={{...styles.tableHeaderCell, whiteSpace: 'normal', lineHeight: '1.2', py: 1, textAlign: 'left', width: '100px', minWidth: '100px', maxWidth: '100px'}}>Status Equip.<br />Removido</TableCell>
+                {/*<TableCell sx={styles.tableHeaderCell}>Status Equip. Removido</TableCell>*/}
+                <TableCell sx={styles.tableHeaderCell}>Equip. Instalado</TableCell>
+                <TableCell sx={{...styles.tableHeaderCell, whiteSpace: 'normal', lineHeight: '1.2', py: 1, textAlign: 'left', width: '100px', minWidth: '100px', maxWidth: '100px'}}>Status Equip.<br />Instalado</TableCell>
+                {/*<TableCell sx={styles.tableHeaderCell}>Status Equip. Instalado</TableCell>*/}
+               {/*<TableCell sx={{ ...styles.tableHeaderCell, ...styles.mediumColumn }}>Status Equip. Instalado</TableCell>*/}
               </TableRow>
             </TableHead>
             <TableBody>
               {data.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>{row['Instalação'] || '-'}</TableCell>
-                  <TableCell>{row['Nota'] || '-'}</TableCell>
-                  <TableCell>{row['Cliente'] || '-'}</TableCell>
-                  <TableCell>{row['Texto breve para o code'] || '-'}</TableCell>
-                  <TableCell>{row['Alavanca'] || '-'}</TableCell>
-                  <TableCell>{formatDate(row['Data Conclusão'])}</TableCell>
-                  <TableCell>{row['Equipamento Removido'] || '-'}</TableCell>
-                  <TableCell>{row['Status Equip. Removido'] || '-'}</TableCell>
-                  <TableCell>{row['Equipamento Instalado'] || '-'}</TableCell>
-                  <TableCell>{row['Status Equip. Instalado'] || '-'}</TableCell>
+                <TableRow key={index} hover>
+                  <TableCell sx={styles.tableCell}>{row['Instalação'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Nota'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Cliente'] || '-'}</TableCell>
+                  <TableCell sx={{ ...styles.tableCell, whiteSpace: 'normal' }}>{row['Texto breve para o code'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Alavanca'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{formatDate(row['Data Conclusão'])}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Equipamento Removido'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Status Equip. Removido'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Equipamento Instalado'] || '-'}</TableCell>
+                  <TableCell sx={styles.tableCell}>{row['Status Equip. Instalado'] || '-'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
