@@ -34,7 +34,7 @@ const styles = {
     boxShadow: 3
   },
   table: {
-    minWidth: '1200px', // Largura mínima maior para acomodar todas as colunas
+    minWidth: '1800px', // Largura mínima maior para acomodar todas as colunas
   },
   tableHeaderCell: {
     backgroundColor: '#1976d2',
@@ -179,7 +179,8 @@ function App() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}> {/* Alterado para maxWidth="xl" */}
+    <Container maxWidth={false} sx={{ mt: 2, mb: 2, px: 4 }}> {/*Pega largura maxima deixando alguma margem lateral*/}
+    {/* </Container><Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}> Alterado para maxWidth="xl" */}
       <Typography variant="h4" component="h1" gutterBottom>
         Consulta de Equipamentos
       </Typography>
@@ -274,12 +275,14 @@ function App() {
                 <TableCell sx={{ ...styles.tableHeaderCell, ...styles.wideColumn }}>Descrição Nota</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Alavanca</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Data Conclusão</TableCell>
-                <TableCell sx={styles.tableHeaderCell}>Equip. Removido</TableCell>
+                {/*<TableCell sx={styles.tableHeaderCell}>Equip. Removido</TableCell>*/}
+                <TableCell sx={{  ...styles.tableHeaderCell, borderLeft: '2px solid black' }}>Equip. Removido</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Material Removido</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Descrição Mat. Removido</TableCell>
                 <TableCell sx={{...styles.tableHeaderCell, whiteSpace: 'normal', lineHeight: '1.2', py: 1, textAlign: 'left', width: '100px', minWidth: '100px', maxWidth: '100px'}}>Status Equip.<br />Removido</TableCell>
                 {/*<TableCell sx={styles.tableHeaderCell}>Status Equip. Removido</TableCell>*/}
-                <TableCell sx={styles.tableHeaderCell}>Equip. Instalado</TableCell>
+                {/*<TableCell sx={styles.tableHeaderCell}>Equip. Instalado</TableCell>*/}
+                <TableCell sx={{  ...styles.tableHeaderCell,   borderLeft: '2px solid black'}}>Equip. Instalado</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Material Instalado</TableCell>
                 <TableCell sx={styles.tableHeaderCell}>Descrição Mat. Instalado</TableCell>
                 <TableCell sx={{...styles.tableHeaderCell, whiteSpace: 'normal', lineHeight: '1.2', py: 1, textAlign: 'left', width: '100px', minWidth: '100px', maxWidth: '100px'}}>Status Equip.<br />Instalado</TableCell>
