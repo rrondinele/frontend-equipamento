@@ -170,8 +170,8 @@ function App() {
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     try {
-      const date = new Date(dateStr);
-      return isNaN(date.getTime()) ? '-' : format(date, 'dd/MM/yyyy');
+      const date = parseISO(dateStr); // Correto: interpreta como local
+      return format(date, 'dd/MM/yyyy');
     } catch {
       return '-';
     }
