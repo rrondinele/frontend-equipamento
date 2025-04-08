@@ -205,8 +205,9 @@ function App() {
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     try {
-      const date = parseISO(dateStr);
-      return format(date, 'dd/MM/yyyy');
+      const date = new Date(dateStr);
+      const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000); // corrige o offset
+      return format(localDate, 'dd/MM/yyyy');
     } catch {
       return '-';
     }
