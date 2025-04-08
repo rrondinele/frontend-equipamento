@@ -247,16 +247,17 @@ function App() {
         <>
           {(totalCount !== null || ultimaAtualizacao) && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 1 }}>
-              {totalCount !== null && (
-                <Typography variant="subtitle2" color="text.secondary">
-                  Total de registros encontrados: <strong>{totalCount}</strong>
-                </Typography>
-              )}
-              {ultimaAtualizacao && (
-                <Typography variant="subtitle2" color="text.secondary">
-                  Dados atualizados até: <strong>{formatDate(ultimaAtualizacao)}</strong>
-                </Typography>
-              )}
+              <Typography variant="subtitle2" color="text.secondary">
+                {totalCount !== null
+                  ? <>Total de registros encontrados: <strong>{totalCount}</strong></>
+                  : <span />}
+              </Typography>
+
+              <Typography variant="subtitle2" color="text.secondary">
+                {ultimaAtualizacao
+                  ? <>Dados atualizados até: <strong>{formatDate(ultimaAtualizacao)}</strong></>
+                  : <span />}
+              </Typography>
             </Box>
           )}
 
