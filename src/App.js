@@ -80,6 +80,17 @@ function App() {
     const equipamentoOk = equipamentoFilter.trim() !== '';
     const notaOk = notaFilter.trim() !== '';
     return dataOk || equipamentoOk || notaOk;
+  };
+  
+  const getUltimaData = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/equipamentos/ultima-data`);
+      if (res.data?.ultimaData) {
+        setUltimaAtualizacao(res.data.ultimaData);
+      }
+    } catch (err) {
+      console.warn('Erro ao buscar a data mais recente:', err);
+    }
   };  
   
   const fetchData = async (modoExemplo = false) => {
@@ -125,7 +136,9 @@ function App() {
       if (!response.data) throw new Error('Resposta da API sem dados');
   
       setData(response.data);
-      setUltimaAtualizacao(response.data[0]?.['Data Conclusão'] ?? null);
+      //setUltimaAtualizacao(response.data[0]?.['Data Conclusão'] ?? null);
+      await getUltimaData();
+
   
       const countRes = await axios.get(`${API_URL}/api/equipamentos/count`, { params });
       setTotalCount(countRes.data.count);
@@ -186,8 +199,7 @@ function App() {
   };
 
   useEffect(() => {
-  // Remover essa chamada automática
-  // fetchData();
+    getUltimaData(); // carrega a data máxima ao abrir
   }, []);
 
   const formatDate = (dateStr) => {
