@@ -73,6 +73,7 @@ function App() {
   const [equipamentoFilter, setEquipamentoFilter] = useState('');
   const [totalCount, setTotalCount] = useState(null);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
+  const [notaFilter, setNotaFilter] = useState('');
 
   const filtrosPreenchidos = () => {
     const dataOk = startDate && endDate;
@@ -101,7 +102,14 @@ function App() {
             .filter(e => e.trim() !== '')
             .join(',');
         }
-  
+
+        if (notaFilter) {
+          params.nota = notaFilter
+            .split(/[\n,;\s]+/)
+            .filter(e => e.trim() !== '')
+            .join(',');
+        }
+          
         if (startDate && endDate) {
           params.dataInicial = format(startDate, 'yyyy-MM-dd');
           params.dataFinal = format(endDate, 'yyyy-MM-dd');
@@ -110,7 +118,7 @@ function App() {
   
       const response = await axios.get(`${API_URL}/api/equipamentos`, {
         params,
-        timeout: 30000
+        timeout: 40000
       });
   
       if (!response.data) throw new Error('Resposta da API sem dados');
@@ -222,6 +230,16 @@ function App() {
               rows={1.5}
               placeholder="Cole a lista aqui"
             />
+            <TextField
+              label="Nota"
+              value={notaFilter}
+              onChange={(e) => setNotaFilter(e.target.value)}
+              size="small"
+              sx={{ width: 250 }}
+              multiline
+              rows={1.5}
+              placeholder="Cole a lista aqui"
+            />
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
               <Button
                   variant="contained"
@@ -258,13 +276,10 @@ function App() {
               </Typography>
 
               <Typography variant="subtitle2" color="text.secondary">
-                {ultimaAtualizacao
-                  ? <>Dados atualizados até: <strong>{formatDate(ultimaAtualizacao)}</strong></>
-                  : <span />}
+                <>Dados atualizados até: <strong>{ultimaAtualizacao ? formatDate(ultimaAtualizacao) : '--'}</strong></>
               </Typography>
             </Box>
           )}
-
           <TableContainer component={Paper} sx={styles.tableContainer}>
             <Table sx={styles.table} aria-label="tabela de equipamentos">
               <TableHead>
