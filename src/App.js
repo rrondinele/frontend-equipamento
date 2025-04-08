@@ -74,52 +74,61 @@ function App() {
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
 
 
-  const fetchData = async () => {
+  const filtrosPreenchidos = () => {
+    const dataOk = startDate && endDate;
+    const equipamentoOk = equipamentoFilter.trim() !== '';
+    return dataOk || equipamentoOk;
+  };
+
+
+  const filtrosPreenchidos = () => {
+    const dataOk = startDate && endDate;
+    const equipamentoOk = equipamentoFilter.trim() !== '';
+    return dataOk || equipamentoOk;
+  };
+  
+  const fetchData = async (modoExemplo = false) => {
     try {
       setLoading(true);
       setError(null);
-
+  
+      // Bloqueia se não for modo exemplo e não tiver filtro
+      if (!modoExemplo && !filtrosPreenchidos()) {
+        setError('Informe um intervalo de datas ou um Equipamento Removido para continuar.');
+        setLoading(false);
+        return;
+      }
+  
       const params = {};
-
-      if (equipamentoFilter) {
-        params.equipamento = equipamentoFilter
-          .split(/[\n,\s]+/)
-          .filter(e => e.trim() !== '')
-          .join(',');
+  
+      if (!modoExemplo) {
+        if (equipamentoFilter) {
+          params.equipamento = equipamentoFilter
+            .split(/[\n,\s]+/)
+            .filter(e => e.trim() !== '')
+            .join(',');
+        }
+  
+        if (startDate && endDate) {
+          params.dataInicial = format(startDate, 'yyyy-MM-dd');
+          params.dataFinal = format(endDate, 'yyyy-MM-dd');
+        }
       }
-
-      if (startDate && endDate) {
-        params.dataInicial = format(startDate, 'yyyy-MM-dd');
-        params.dataFinal = format(endDate, 'yyyy-MM-dd');
-      }
-
+  
       const response = await axios.get(`${API_URL}/api/equipamentos`, {
         params,
         timeout: 30000
       });
-
-      if (!response.data) {
-        throw new Error('Resposta da API sem dados');
-      }
-
+  
+      if (!response.data) throw new Error('Resposta da API sem dados');
+  
       setData(response.data);
-      
-      if (response.data.length > 0) {
-        setUltimaAtualizacao(response.data[0]['Data Conclusão']);
-      } else {
-        setUltimaAtualizacao(null);
-      }  
-
-      try {
-        const countRes = await axios.get(`${API_URL}/api/equipamentos/count`, { params });
-        setTotalCount(countRes.data.count);
-      } catch (countErr) {
-        console.warn("Não foi possível obter a contagem de registros:", countErr);
-        setTotalCount(null);
-      }
+      setUltimaAtualizacao(response.data[0]?.['Data Conclusão'] ?? null);
+  
+      const countRes = await axios.get(`${API_URL}/api/equipamentos/count`, { params });
+      setTotalCount(countRes.data.count);
     } catch (err) {
       let errorMessage = 'Erro ao carregar dados';
-
       if (err.response) {
         errorMessage = `Erro ${err.response.status}: ${err.response.data?.error || err.message}`;
         console.error('Detalhes do erro:', err.response.data);
@@ -128,12 +137,12 @@ function App() {
       } else {
         errorMessage = `Erro na requisição: ${err.message}`;
       }
-
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleExport = async () => {
     try {
@@ -222,12 +231,15 @@ function App() {
               placeholder="Cole a lista aqui (separar por vírgula ou quebra de linha)"
             />
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-              <Button variant="contained" onClick={fetchData} size="medium" sx={{ height: 40, minWidth: 120 }} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : 'Filtrar'}
-              </Button>
-              <Button variant="outlined" onClick={handleExport} size="medium" sx={{ height: 40, minWidth: 120 }} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : 'Exportar'}
-              </Button>
+              <Button
+                  variant="contained"
+                  onClick={() => fetchData(false)}
+                  size="medium"
+                  sx={{ height: 40, minWidth: 120 }}
+                  disabled={loading || !filtrosPreenchidos()}
+                >
+                  {loading ? <CircularProgress size={24} /> : 'Filtrar'}
+                </Button>
             </Box>
           </Box>
         </LocalizationProvider>
