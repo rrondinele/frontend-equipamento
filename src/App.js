@@ -73,14 +73,6 @@ function App() {
   const [totalCount, setTotalCount] = useState(null);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
 
-
-  const filtrosPreenchidos = () => {
-    const dataOk = startDate && endDate;
-    const equipamentoOk = equipamentoFilter.trim() !== '';
-    return dataOk || equipamentoOk;
-  };
-
-
   const filtrosPreenchidos = () => {
     const dataOk = startDate && endDate;
     const equipamentoOk = equipamentoFilter.trim() !== '';
@@ -141,8 +133,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
-  
+  };  
 
   const handleExport = async () => {
     try {
