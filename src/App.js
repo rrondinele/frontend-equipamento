@@ -264,6 +264,16 @@ function App() {
                 >
                   {loading ? <CircularProgress size={24} /> : 'Filtrar'}
                 </Button>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  onClick={handleExport}
+                  size="medium"
+                  sx={{ height: 40, minWidth: 120 }}
+                  disabled={loading || data.length === 0}
+                >
+                  Exportar Excel
+                </Button>
             </Box>
           </Box>
         </LocalizationProvider>
