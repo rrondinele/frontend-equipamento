@@ -71,6 +71,8 @@ function App() {
   const [endDate, setEndDate] = useState(null);
   const [equipamentoFilter, setEquipamentoFilter] = useState('');
   const [totalCount, setTotalCount] = useState(null);
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
+
 
   const fetchData = async () => {
     try {
@@ -101,6 +103,12 @@ function App() {
       }
 
       setData(response.data);
+      
+      if (response.data.length > 0) {
+        setUltimaAtualizacao(response.data[0]['Data Conclusão']);
+      } else {
+        setUltimaAtualizacao(null);
+      }  
 
       try {
         const countRes = await axios.get(`${API_URL}/api/equipamentos/count`, { params });
@@ -168,7 +176,8 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData();
+  // Remover essa chamada automática
+  // fetchData();
   }, []);
 
   const formatDate = (dateStr) => {
@@ -236,11 +245,18 @@ function App() {
         </Box>
       ) : (
         <>
-          {totalCount !== null && (
-            <Box sx={{ mt: 2, mb: 1 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                Total de registros encontrados: <strong>{totalCount}</strong>
-              </Typography>
+          {(totalCount !== null || ultimaAtualizacao) && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, mb: 1 }}>
+              {totalCount !== null && (
+                <Typography variant="subtitle2" color="text.secondary">
+                  Total de registros encontrados: <strong>{totalCount}</strong>
+                </Typography>
+              )}
+              {ultimaAtualizacao && (
+                <Typography variant="subtitle2" color="text.secondary">
+                  Dados atualizados até: <strong>{formatDate(ultimaAtualizacao)}</strong>
+                </Typography>
+              )}
             </Box>
           )}
 
