@@ -17,7 +17,8 @@ import {
   Alert,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { ptBR } from 'date-fns/locale';
+//import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
 import { parseISO } from 'date-fns';
@@ -197,7 +198,7 @@ function App() {
       </Typography>
 
       <Box sx={styles.filterContainer}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
           <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
             <DatePicker
               label="Data Inicial"
@@ -219,7 +220,7 @@ function App() {
               sx={{ width: 250 }}
               multiline
               rows={1.5}
-              placeholder="Cole a lista aqui (separar por vírgula ou quebra de linha)"
+              placeholder="Cole a lista aqui"
             />
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
               <Button
