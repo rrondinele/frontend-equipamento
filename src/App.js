@@ -78,8 +78,9 @@ function App() {
   const filtrosPreenchidos = () => {
     const dataOk = startDate && endDate;
     const equipamentoOk = equipamentoFilter.trim() !== '';
-    return dataOk || equipamentoOk;
-  };
+    const notaOk = notaFilter.trim() !== '';
+    return dataOk || equipamentoOk || notaOk;
+  };  
   
   const fetchData = async (modoExemplo = false) => {
     try {
