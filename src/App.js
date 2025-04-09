@@ -170,6 +170,13 @@ function App() {
           .join(',');
       }
 
+      if (notaFilter) {
+        params.nota = notaFilter
+          .split(/[\n,;\s]+/)
+          .filter(e => e.trim() !== '')
+          .join(',');
+      }
+
       if (startDate && endDate) {
         params.dataInicial = format(startDate, 'yyyy-MM-dd');
         params.dataFinal = format(endDate, 'yyyy-MM-dd');
