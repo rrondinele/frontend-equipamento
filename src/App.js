@@ -162,35 +162,64 @@ function App() {
     try {
       setLoading(true);
       const params = {};
-
+  
       if (equipamentoFilter) {
         params.equipamento = equipamentoFilter
           .split(/[\n,\s]+/)
           .filter(e => e.trim() !== '')
           .join(',');
       }
-
+  
       if (notaFilter) {
         params.nota = notaFilter
           .split(/[\n,;\s]+/)
           .filter(e => e.trim() !== '')
           .join(',');
       }
-
+  
       if (startDate && endDate) {
         params.dataInicial = format(startDate, 'yyyy-MM-dd');
         params.dataFinal = format(endDate, 'yyyy-MM-dd');
       }
-
+  
       const response = await axios.get(`${API_URL}/api/equipamentos/export`, {
         params,
-        responseType: 'blob'
+        responseType: 'json' // <- troca pra JSON, não precisa mais vir como 'blob'
       });
-
-      saveAs(new Blob([response.data]), 'equipamentos_filtrados.xlsx');
+  
+      const rawData = response.data;
+  
+      // Mapeia os dados para colunas com nomes desejados e formata a data
+      const exportData = rawData.map(item => ({
+        'Instalação': item['Instalação'],
+        'Nota': item['Nota'],
+        'Cliente': item['Cliente'],
+        'Texto breve para o code': item['Texto breve para o code'],
+        'Alavanca': item['Alavanca'],
+        'Data Conclusão': formatDate(item['Data Conclusão']),
+        'Equipamento Removido': item['Equipamento Removido'],
+        'Material Removido': item['Material Removido'],
+        'Descrição Mat. Removido': item['Descrição Mat. Removido'],
+        'Status Equip. Removido': item['Status Equip. Removido'],
+        'Equipamento Instalado': item['Equipamento Instalado'],
+        'Material Instalado': item['Material Instalado'],
+        'Descrição Mat. Instalado': item['Descrição Mat. Instalado'],
+        'Status Equip. Instalado': item['Status Equip. Instalado']
+      }));
+  
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Equipamentos");
+  
+      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+  
+      saveAs(blob, 'equipamentos_filtrados.xlsx');
     } catch (err) {
       let errorMessage = 'Erro ao exportar dados';
-
+  
       if (err.response) {
         errorMessage = `Erro ${err.response.status}: ${err.response.data?.error || err.message}`;
       } else if (err.request) {
@@ -198,13 +227,13 @@ function App() {
       } else {
         errorMessage = `Erro na requisição: ${err.message}`;
       }
-
+  
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     getUltimaData(); // carrega a data máxima ao abrir
   }, []);
