@@ -199,12 +199,12 @@ function App() {
         'Data Conclusão': formatDate(item['Data Conclusão']),
         'Equipamento Removido': item['Equipamento Removido'],
         'Material Removido': item['Material Removido'],
-        'Descrição Mat. Removido': item['Descrição Mat. Removido'],
-        'Status Equip. Removido': item['Status Equip. Removido'],
+        'Descrição Mat. Removido': item['Descrição Material Removido'],
+        'Status Equip. Removido': item['Status Equipamento Removido'],
         'Equipamento Instalado': item['Equipamento Instalado'],
         'Material Instalado': item['Material Instalado'],
-        'Descrição Mat. Instalado': item['Descrição Mat. Instalado'],
-        'Status Equip. Instalado': item['Status Equip. Instalado']
+        'Descrição Mat. Instalado': item['Descrição Material Instalado'],
+        'Status Equip. Instalado': item['Status Equipamento Instalado']
       }));
   
       const worksheet = XLSX.utils.json_to_sheet(exportData);
