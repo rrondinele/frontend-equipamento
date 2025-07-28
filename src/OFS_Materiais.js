@@ -243,7 +243,7 @@ function OFS_Materiais() {
                         fontWeight: 'bold'
                       }}
                     >
-                      {selected.includes('Todos') ? actionOptions.length - 1 : selected.length}
+                      {selected.includes('Todos') ? statusOptions.length - 1 : selected.length}
                     </Box>
                   </Box>
                 )}
