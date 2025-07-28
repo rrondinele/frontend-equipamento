@@ -111,7 +111,7 @@ function OFS_Materiais() {
         params.equipamento = equipamentoFilter.split(/[\n,\s]+/).filter(e => e).join(',');
       }
 
-      const response = await axios.get(`${API_URL}/api/materiais`, {
+      const response = await axios.get(`${API_URL}/api/materiais/export`, {
         params,
         responseType: 'json'
       });
