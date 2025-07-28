@@ -250,7 +250,7 @@ function OFS_Materiais() {
                 MenuProps={{
                   PaperProps: {
                     style: {
-                      maxHeight: 250,
+                      maxHeight: 400,
                     },
                   },
                 }}
