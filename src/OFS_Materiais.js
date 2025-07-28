@@ -226,14 +226,14 @@ function OFS_Materiais() {
                 <TableRow>
                   <TableCell sx={styles.tableHeaderCell}>Data</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Nota</TableCell>
-                  <TableCell sx={styles.tableHeaderCell}>Descrição</TableCell>
-                  <TableCell sx={styles.tableHeaderCell}>Acao</TableCell>
+                  <TableCell sx={styles.tableHeaderCell}>Texto Breve</TableCell>
+                  <TableCell sx={styles.tableHeaderCell}>Ação</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Status do Usuário</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Tipo de nota</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Instalação</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Zona</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Lote</TableCell>
-                  <TableCell sx={styles.tableHeaderCell}>Descricao</TableCell>
+                  <TableCell sx={styles.tableHeaderCell}>Descrição</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Quantidade</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Serial</TableCell>
                   <TableCell sx={styles.tableHeaderCell}>Base Operacional</TableCell>
@@ -244,7 +244,7 @@ function OFS_Materiais() {
                   <TableRow key={index}>
                     <TableCell sx={styles.tableCell}>{formatDate(row['Data'])}</TableCell>
                     <TableCell sx={styles.tableCell}>{row['Nota']}</TableCell>
-                    <TableCell sx={styles.tableCell}>{row['Descrição']}</TableCell>
+                    <TableCell sx={styles.tableCell}>{row['Texto Breve']}</TableCell>
                     <TableCell sx={styles.tableCell}>{row['Acao']}</TableCell>
                     <TableCell sx={styles.tableCell}>{row['Status do Usuário']}</TableCell>
                     <TableCell sx={styles.tableCell}>{row['Tipo de nota']}</TableCell>
