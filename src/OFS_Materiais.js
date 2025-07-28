@@ -255,7 +255,7 @@ function OFS_Materiais() {
                   },
                 }}
               >
-                {actionOptions.map((status) => (
+                {statusOptions.map((status) => (
                   <MenuItem key={status} value={status}>
                     <Checkbox checked={statusFilter.includes(status)} />
                     <ListItemText primary={status} />
