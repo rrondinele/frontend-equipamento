@@ -211,7 +211,18 @@ function OFS_Materiais() {
                   }
                 }}
                 input={<OutlinedInput label="Status do Usuário" />}
-                renderValue={(selected) => selected.join(', ')}
+                renderValue={(selected) => {
+                  if (selected.length === 0) return 'Nenhum selecionado';
+                  if (selected.includes('Todos')) return 'Todos';
+                  return `${selected.length} status selecionados`;
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 250
+                    }
+                  }
+                }}
               >
                 {statusOptions.map((status) => (
                   <MenuItem key={status} value={status}>
