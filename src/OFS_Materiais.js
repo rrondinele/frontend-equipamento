@@ -227,7 +227,7 @@ function OFS_Materiais() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {selected.includes('Todos')
                       ? 'Todos'
-                      : `${selected.length} selecionado${selected.length > 1 ? 's' : ''}`}
+                      : `selecionado${selected.length > 1 ? 's' : ''}`}
                     <Box
                       component="span"
                       sx={{
