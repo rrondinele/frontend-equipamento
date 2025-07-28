@@ -3,8 +3,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import {
   Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, TextField, Button, Box, CircularProgress, Alert, Checkbox, FormControl, FormGroup,
-  FormControlLabel, Popover, Chip, Autocomplete
+  Paper, TextField, Button, Box, CircularProgress, Alert, MenuItem, Select, InputLabel, FormControl, OutlinedInput, Checkbox, ListItemText
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { ptBR } from 'date-fns/locale';
@@ -15,59 +14,25 @@ import { saveAs } from 'file-saver';
 
 const API_URL = 'https://backend-equipamento.onrender.com';
 
+const statusOptions = [
+  'Todos',
+  'Cliente/Levantamento de Carga',
+  'Desinstalado',
+  'Instalado',
+  'Sem aba de equipamentos',
+  'Sem registros',
+  'Tabela equipamentos vazia'
+];
+
 const styles = {
-  tableContainer: {
-    width: '100%',
-    overflowX: 'auto',
-    marginTop: '16px',
-    boxShadow: 3
-  },
-  table: {
-    minWidth: '1500px',
-  },
+  tableContainer: { width: '100%', overflowX: 'auto', marginTop: '16px', boxShadow: 3 },
+  table: { minWidth: '1500px' },
   tableHeaderCell: {
-    backgroundColor: '#1976d2',
-    color: 'white',
-    fontWeight: '500',
-    fontSize: '0.875rem',
-    padding: '12px 16px',
-    borderBottom: 'none',
-    whiteSpace: 'nowrap'
+    backgroundColor: '#1976d2', color: 'white', fontWeight: '500',
+    fontSize: '0.875rem', padding: '12px 16px', borderBottom: 'none', whiteSpace: 'nowrap'
   },
-  tableCell: {
-    padding: '10px 16px',
-    whiteSpace: 'nowrap',
-    fontSize: '0.8rem'
-  },
-  filterContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: '16px',
-    borderRadius: '8px',
-    marginBottom: '24px'
-  },
-  filterButton: {
-    minWidth: 200,
-    justifyContent: 'flex-start',
-    textTransform: 'none',
-    borderColor: '#ccc',
-    '&:hover': {
-      borderColor: '#1976d2',
-    },
-  },
-  filterChip: {
-    margin: '0 4px 4px 0',
-  },
-  visuallyHidden: {
-    border: 0,
-    clip: 'rect(0 0 0 0)',
-    height: 1,
-    margin: -1,
-    overflow: 'hidden',
-    padding: 0,
-    position: 'absolute',
-    top: 20,
-    width: 1,
-  },
+  tableCell: { padding: '10px 16px', whiteSpace: 'nowrap', fontSize: '0.8rem' },
+  filterContainer: { backgroundColor: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '24px' }
 };
 
 function OFS_Materiais() {
@@ -78,61 +43,28 @@ function OFS_Materiais() {
   const [endDate, setEndDate] = useState(null);
   const [equipamentoFilter, setEquipamentoFilter] = useState('');
   const [notaFilter, setNotaFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(['Todos']);
   const [totalCount, setTotalCount] = useState(null);
-  
-  // Estados para filtro de ação
-  const actionOptions = [
-    'Todos',
-    'Cliente/Levantamento de Carga',
-    'Desinstalado',
-    'Instalado',
-    'Sem aba de equipamentos',
-    'Sem registros',
-    'Tabela equipamentos vazia'
-  ];
-  
-  const [actionFilters, setActionFilters] = useState({
-    'Todos': true,
-    'Cliente/Levantamento de Carga': true,
-    'Desinstalado': true,
-    'Instalado': true,
-    'Sem aba de equipamentos': true,
-    'Sem registros': true,
-    'Tabela equipamentos vazia': true
-  });
-  
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const filtrosPreenchidos = () => {
-    return startDate && endDate || equipamentoFilter.trim() || notaFilter.trim();
+    return startDate && endDate || equipamentoFilter.trim() || notaFilter.trim() || statusFilter.length > 0;
   };
 
-  const handleActionFilterClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleActionFilterClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleActionFilterChange = (option) => (event) => {
-    if (option === 'Todos') {
-      const newState = {};
-      actionOptions.forEach(opt => {
-        newState[opt] = event.target.checked;
-      });
-      setActionFilters(newState);
-    } else {
-      setActionFilters({
-        ...actionFilters,
-        [option]: event.target.checked,
-        'Todos': false, // Desmarca "Todos" quando um status específico é alterado
-      });
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      const date = new Date(dateStr);
+      const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+      return format(localDate, 'dd/MM/yyyy');
+    } catch {
+      return '-';
     }
   };
 
-  const open = Boolean(anchorEl);
-  const id = open ? 'action-filter-popover' : undefined;
+  const getStatusParam = () => {
+    if (statusFilter.includes('Todos')) return '';
+    return statusFilter.join(',');
+  };
 
   const fetchData = async () => {
     try {
@@ -140,7 +72,7 @@ function OFS_Materiais() {
       setError(null);
 
       if (!filtrosPreenchidos()) {
-        setError('Informe um intervalo de datas, Nota ou Serial para continuar.');
+        setError('Informe um intervalo de datas, Nota ou Descrição para continuar.');
         setLoading(false);
         return;
       }
@@ -156,14 +88,9 @@ function OFS_Materiais() {
       if (equipamentoFilter) {
         params.equipamento = equipamentoFilter.split(/[\n,\s]+/).filter(e => e).join(',');
       }
-      
-      // Adiciona filtros de ação se não estiver selecionado "Todos"
-      if (!actionFilters['Todos']) {
-        const selectedActions = Object.keys(actionFilters)
-          .filter(key => actionFilters[key] && key !== 'Todos');
-        if (selectedActions.length > 0) {
-          params.acoes = selectedActions.join(',');
-        }
+      const statusParam = getStatusParam();
+      if (statusParam) {
+        params.status = statusParam;
       }
 
       const response = await axios.get(`${API_URL}/api/materiais`, { params });
@@ -191,14 +118,9 @@ function OFS_Materiais() {
       if (equipamentoFilter) {
         params.equipamento = equipamentoFilter.split(/[\n,\s]+/).filter(e => e).join(',');
       }
-      
-      // Aplica filtros de ação para exportação também
-      if (!actionFilters['Todos']) {
-        const selectedActions = Object.keys(actionFilters)
-          .filter(key => actionFilters[key] && key !== 'Todos');
-        if (selectedActions.length > 0) {
-          params.acoes = selectedActions.join(',');
-        }
+      const statusParam = getStatusParam();
+      if (statusParam) {
+        params.status = statusParam;
       }
 
       const response = await axios.get(`${API_URL}/api/materiais/export`, {
@@ -234,23 +156,6 @@ function OFS_Materiais() {
     }
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    try {
-      const date = new Date(dateStr);
-      const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-      return format(localDate, 'dd/MM/yyyy');
-    } catch {
-      return '-';
-    }
-  };
-
-  // Filtra os dados localmente (opcional, pode remover se o backend já filtrar)
-  const filteredData = data.filter(row => {
-    if (actionFilters['Todos']) return true;
-    return actionFilters[row['Acao']];
-  });
-
   return (
     <Container maxWidth={false} sx={{ mt: 2, mb: 2, px: 4 }}>
       <Typography variant="h4" gutterBottom>
@@ -272,87 +177,12 @@ function OFS_Materiais() {
               onChange={setEndDate}
               renderInput={(params) => <TextField {...params} size="small" sx={{ width: 180 }} />}
             />
-            
-            {/* Filtro de Ação */}
-            <Button
-              variant="outlined"
-              onClick={handleActionFilterClick}
-              sx={styles.filterButton}
-              endIcon={
-                <Box component="span" sx={{ 
-                  backgroundColor: '#1976d2', 
-                  color: 'white', 
-                  borderRadius: '50%', 
-                  width: 24, 
-                  height: 24, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  fontSize: '0.75rem'
-                }}>
-                  {actionFilters['Todos'] ? actionOptions.length - 1 : 
-                    Object.keys(actionFilters).filter(k => actionFilters[k] && k !== 'Todos').length}
-                </Box>
-              }
-            >
-              Ação: {actionFilters['Todos'] ? 'Todos' : 
-                Object.keys(actionFilters)
-                  .filter(k => actionFilters[k] && k !== 'Todos')
-                  .map(k => k.split(' ')[0]) // Mostra apenas a primeira palavra para economizar espaço
-                  .join(', ')}
-            </Button>
-            
-            <Popover
-              id={id}
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handleActionFilterClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-            >
-              <Box sx={{ p: 2, maxWidth: 300 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>Filtrar por Status da Ação</Typography>
-                <FormControl component="fieldset" fullWidth>
-                  <FormGroup>
-                    {actionOptions.map((option) => (
-                      <FormControlLabel
-                        key={option}
-                        control={
-                          <Checkbox
-                            checked={actionFilters[option]}
-                            onChange={handleActionFilterChange(option)}
-                            name={option}
-                            color="primary"
-                          />
-                        }
-                        label={option}
-                        sx={{ 
-                          '& .MuiFormControlLabel-label': { 
-                            fontSize: '0.875rem',
-                            textOverflow: 'ellipsis',
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap'
-                          } 
-                        }}
-                      />
-                    ))}
-                  </FormGroup>
-                </FormControl>
-              </Box>
-            </Popover>
-            
             <TextField
               label="Nota"
               value={notaFilter}
               onChange={(e) => setNotaFilter(e.target.value)}
               size="small"
-              sx={{ width: 250 }}
+              sx={{ width: 200 }}
               multiline
               rows={1.5}
               placeholder="Cole a lista aqui"
@@ -362,11 +192,35 @@ function OFS_Materiais() {
               value={equipamentoFilter}
               onChange={(e) => setEquipamentoFilter(e.target.value)}
               size="small"
-              sx={{ width: 250 }}
+              sx={{ width: 200 }}
               multiline
               rows={1.5}
               placeholder="Cole a lista aqui"
             />
+            <FormControl size="small" sx={{ minWidth: 260 }}>
+              <InputLabel>Status do Usuário</InputLabel>
+              <Select
+                multiple
+                value={statusFilter}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.includes('Todos')) {
+                    setStatusFilter(['Todos']);
+                  } else {
+                    setStatusFilter(value.filter(v => v !== 'Todos'));
+                  }
+                }}
+                input={<OutlinedInput label="Status do Usuário" />}
+                renderValue={(selected) => selected.join(', ')}
+              >
+                {statusOptions.map((status) => (
+                  <MenuItem key={status} value={status}>
+                    <Checkbox checked={statusFilter.includes(status)} />
+                    <ListItemText primary={status} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
               <Button variant="contained" onClick={fetchData} disabled={loading}>
                 {loading ? <CircularProgress size={24} /> : 'Filtrar'}
@@ -390,13 +244,6 @@ function OFS_Materiais() {
           {totalCount !== null && (
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
               Total de registros encontrados: <strong>{totalCount}</strong>
-              {!actionFilters['Todos'] && (
-                <span style={{ marginLeft: '16px' }}>
-                  (Filtrados: <strong>
-                    {filteredData.length}
-                  </strong>)
-                </span>
-              )}
             </Typography>
           )}
           <TableContainer component={Paper} sx={styles.tableContainer}>
@@ -419,7 +266,7 @@ function OFS_Materiais() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredData.map((row, index) => (
+                {data.map((row, index) => (
                   <TableRow key={index}>
                     <TableCell sx={styles.tableCell}>{formatDate(row['Data'])}</TableCell>
                     <TableCell sx={styles.tableCell}>{row['Nota']}</TableCell>
