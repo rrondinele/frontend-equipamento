@@ -148,7 +148,8 @@ function OFS_Materiais() {
     if (!dateStr) return '-';
     try {
       const date = new Date(dateStr);
-      return format(date, 'dd/MM/yyyy');
+      const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+      return format(localDate, 'dd/MM/yyyy');
     } catch {
       return '-';
     }
