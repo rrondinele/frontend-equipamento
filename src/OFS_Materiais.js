@@ -176,9 +176,9 @@ function OFS_Materiais() {
               renderInput={(params) => <TextField {...params} size="small" sx={{ width: 180 }} />}
             />
             <TextField
-              label="Descrição (Material)"
-              value={equipamentoFilter}
-              onChange={(e) => setEquipamentoFilter(e.target.value)}
+              label="Nota"
+              value={notaFilter}
+              onChange={(e) => setNotaFilter(e.target.value)}
               size="small"
               sx={{ width: 250 }}
               multiline
@@ -186,9 +186,9 @@ function OFS_Materiais() {
               placeholder="Cole a lista aqui"
             />
             <TextField
-              label="Nota"
-              value={notaFilter}
-              onChange={(e) => setNotaFilter(e.target.value)}
+              label="Serial"
+              value={equipamentoFilter}
+              onChange={(e) => setEquipamentoFilter(e.target.value)}
               size="small"
               sx={{ width: 250 }}
               multiline
