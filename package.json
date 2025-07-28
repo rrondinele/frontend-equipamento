@@ -7,19 +7,18 @@
     "@emotion/styled": "^11.11.5",
     "@mui/material": "^5.15.15",
     "@mui/x-date-pickers": "^7.0.4",
-    "ajv": "8.12.0",
-    "ajv-keywords": "5.1.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "ajv-keywords": "^5.1.0",
     "axios": "^1.8.4",
     "date-fns": "^2.30.0",
     "file-saver": "^2.0.5",
-    "fork-ts-checker-webpack-plugin": "7.2.0",
-    "postcss": "8.4.38",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "5.0.1",
-    "svgo": "3.0.5",
-    "xlsx": "0.18.5"
+    "react-scripts": "^5.0.1",
+    "web-vitals": "^5.0.3",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -39,14 +38,8 @@
       "last 1 safari version"
     ]
   },
-  "overrides": {
-    "nth-check": "2.1.1",
-    "postcss": "8.4.38",
-    "ajv": "8.12.0",
-    "ajv-keywords": "5.1.0"
-  },
   "engines": {
-    "node": "18.x",
-    "npm": "9.x"
+    "node": "22.x",
+    "npm": "10.x"
   }
 }

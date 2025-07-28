@@ -13,6 +13,8 @@ import { format } from 'date-fns';
 import { saveAs } from 'file-saver';
 
 const API_URL = 'https://backend-equipamento.onrender.com';
+//const API_URL = 'http://localhost:5000'; // mesma porta que seu backend está usando
+
 
 const styles = {
   tableContainer: {
