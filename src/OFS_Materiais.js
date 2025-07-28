@@ -46,6 +46,18 @@ function OFS_Materiais() {
   const [statusFilter, setStatusFilter] = useState(['Todos']);
   const [totalCount, setTotalCount] = useState(null);
 
+
+
+  const getStatusLabel = () => {
+    if (statusFilter.includes('Todos')) return 'Todos';
+    return `${statusFilter.length} selecionado${statusFilter.length > 1 ? 's' : ''}`;
+  };
+
+  const getStatusCount = () => {
+    return statusFilter.includes('Todos') ? statusOptions.length - 1 : statusFilter.length;
+  };
+
+
   const filtrosPreenchidos = () => {
     return startDate && endDate || equipamentoFilter.trim() || notaFilter.trim() || statusFilter.length > 0;
   };
@@ -197,8 +209,8 @@ function OFS_Materiais() {
               rows={1.5}
               placeholder="Cole a lista aqui"
             />
-            <FormControl size="small" sx={{ minWidth: 260 }}>
-              <InputLabel>Status do Usuário</InputLabel>
+            <FormControl size="small" sx={{ minWidth: 240 }}>
+              <InputLabel>Status</InputLabel>
               <Select
                 multiple
                 value={statusFilter}
@@ -210,21 +222,40 @@ function OFS_Materiais() {
                     setStatusFilter(value.filter(v => v !== 'Todos'));
                   }
                 }}
-                input={<OutlinedInput label="Status do Usuário" />}
-                renderValue={(selected) => {
-                  if (selected.length === 0) return 'Nenhum selecionado';
-                  if (selected.includes('Todos')) return 'Todos';
-                  return `${selected.length} status selecionados`;
-                }}
+                input={<OutlinedInput label="Status" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {selected.includes('Todos')
+                      ? 'Todos'
+                      : `${selected.length} selecionado${selected.length > 1 ? 's' : ''}`}
+                    <Box
+                      component="span"
+                      sx={{
+                        backgroundColor: '#1976d2',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: 22,
+                        height: 22,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {selected.includes('Todos') ? actionOptions.length - 1 : selected.length}
+                    </Box>
+                  </Box>
+                )}
                 MenuProps={{
                   PaperProps: {
                     style: {
-                      maxHeight: 250
-                    }
-                  }
+                      maxHeight: 250,
+                    },
+                  },
                 }}
               >
-                {statusOptions.map((status) => (
+                {actionOptions.map((status) => (
                   <MenuItem key={status} value={status}>
                     <Checkbox checked={statusFilter.includes(status)} />
                     <ListItemText primary={status} />
@@ -232,6 +263,7 @@ function OFS_Materiais() {
                 ))}
               </Select>
             </FormControl>
+
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
               <Button variant="contained" onClick={fetchData} disabled={loading}>
                 {loading ? <CircularProgress size={24} /> : 'Filtrar'}
