@@ -8,7 +8,7 @@ function MainRouter() {
     <Router>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/materiais" element={<OFS_Materiais />} />
+        <Route path="/ofs-materiais" element={<OFS_Materiais />} />
       </Routes>
     </Router>
   );
