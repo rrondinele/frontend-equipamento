@@ -119,7 +119,7 @@ function OFS_Materiais() {
       const exportData = response.data.map(item => ({
         'Data': formatDate(item['Data']),
         'Nota': item['Nota'],
-        'Descrição': item['Descrição'],
+        'Texto': item['Texto Breve'],
         'Acao': item['Acao'],
         'Status do Usuário': item['Status do Usuário'],
         'Tipo de nota': item['Tipo de nota'],
