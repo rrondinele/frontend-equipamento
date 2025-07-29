@@ -57,9 +57,14 @@ function OFS_Materiais() {
     return statusFilter.includes('Todos') ? statusOptions.length - 1 : statusFilter.length;
   };
 
-
   const filtrosPreenchidos = () => {
-    return startDate && endDate || equipamentoFilter.trim() || notaFilter.trim() || statusFilter.length > 0;
+    const temStatus = statusFilter.length > 0 && !statusFilter.includes('Todos');
+    return (
+      (startDate && endDate) ||
+      equipamentoFilter.trim() ||
+      notaFilter.trim() ||
+      temStatus
+    );
   };
 
   const formatDate = (dateStr) => {
