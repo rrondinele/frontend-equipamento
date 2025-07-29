@@ -45,9 +45,7 @@ function OFS_Materiais() {
   const [notaFilter, setNotaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState(['Todos']);
   const [totalCount, setTotalCount] = useState(null);
-
-
-
+  
   const getStatusLabel = () => {
     if (statusFilter.includes('Todos')) return 'Todos';
     return `${statusFilter.length} selecionado${statusFilter.length > 1 ? 's' : ''}`;
@@ -89,7 +87,7 @@ function OFS_Materiais() {
       setError(null);
 
       if (!filtrosPreenchidos()) {
-        setError('Informe um intervalo de datas, Nota ou Serial para continuar.');
+        setError('Informe um intervalo de Datas, Nota ou Serial para continuar.');
         setLoading(false);
         return;
       }
