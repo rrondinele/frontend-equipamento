@@ -89,7 +89,7 @@ function OFS_Materiais() {
       setError(null);
 
       if (!filtrosPreenchidos()) {
-        setError('Informe um intervalo de datas, Nota ou Descrição para continuar.');
+        setError('Informe um intervalo de datas, Nota ou Serial para continuar.');
         setLoading(false);
         return;
       }
